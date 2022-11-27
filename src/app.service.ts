@@ -2,6 +2,7 @@ import { Injectable, OnModuleInit } from '@nestjs/common';
 import { BitvavoService } from './bitvavo/bitvavo.service';
 import { CronJob } from 'cron';
 import { Cron, SchedulerRegistry } from '@nestjs/schedule';
+import { Logger } from './logger/logger.service';
 
 interface IBuyConfigEntry {
   market: string;
@@ -16,6 +17,7 @@ interface IWithdrawConfigEntry {
   address: string;
 }
 
+// TODO move configs to separate file
 const BUY_CONFIG: IBuyConfigEntry[] = [
   { market: 'ETH-EUR', amountQuote: 15, cron: '1 1 * * MON' },
   // { market: 'ETH-EUR', amountQuote: 15, cron: '* * * * *' },
@@ -38,15 +40,19 @@ export class AppService implements OnModuleInit {
   constructor(
     private readonly bitvavoService: BitvavoService,
     private readonly schedulerRegistry: SchedulerRegistry,
+    private readonly logger: Logger,
   ) {
     this.bitvavoService = bitvavoService;
+    this.schedulerRegistry = schedulerRegistry;
+
+    this.logger.setContext(AppService.name);
   }
 
   async onModuleInit(): Promise<void> {
     const buyConfigCheck = await this.verifyBuyConfig(BUY_CONFIG);
 
     if (!buyConfigCheck) {
-      console.error('Buy Config invalid!');
+      this.logger.error('Buy Config invalid!');
 
       return;
     }
@@ -62,7 +68,7 @@ export class AppService implements OnModuleInit {
     this.listCronjobs();
   }
 
-  @Cron('* * * * *', { name: 'listCronjobs' })
+  @Cron('1 * * * *', { name: 'listCronjobs' })
   listCronjobs() {
     const jobs = this.schedulerRegistry.getCronJobs();
 
@@ -75,7 +81,7 @@ export class AppService implements OnModuleInit {
         next = 'error: next fire date is in the past!';
       }
 
-      console.log(`job: ${key} -> next: ${next}`);
+      this.logger.log(`job: ${key} -> next: ${next}`);
     });
   }
 
@@ -115,12 +121,14 @@ export class AppService implements OnModuleInit {
       if (!asset1 || !asset2) {
         success = false;
 
-        console.error(
+        this.logger.error(
           'verifyBuyConfig asset not found',
-          symbol1,
-          asset1,
-          symbol2,
-          asset2,
+          JSON.stringify({
+            symbol1,
+            asset1,
+            symbol2,
+            asset2,
+          }),
         );
 
         break;
@@ -131,7 +139,12 @@ export class AppService implements OnModuleInit {
       if (!market) {
         success = false;
 
-        console.error('verifyBuyConfig market not found', buyConfig.market);
+        this.logger.error(
+          'verifyBuyConfig market not found',
+          JSON.stringify({
+            market: buyConfig.market,
+          }),
+        );
 
         break;
       }
@@ -139,9 +152,9 @@ export class AppService implements OnModuleInit {
       if (!buyConfig.amount && !buyConfig.amountQuote) {
         success = false;
 
-        console.error(
+        this.logger.error(
           'verifyBuyConfig amount or amountQuote required',
-          buyConfig,
+          JSON.stringify(buyConfig),
         );
 
         break;
@@ -155,7 +168,7 @@ export class AppService implements OnModuleInit {
     const openOrders = await this.bitvavoService.openOrders(buyConfig.market);
 
     if (openOrders.length > 0) {
-      console.log('executeBuyJob: Order open for Market', buyConfig.market);
+      this.logger.log('executeBuyJob: Order open for Market', buyConfig.market);
 
       return false;
     }
@@ -166,10 +179,12 @@ export class AppService implements OnModuleInit {
 
     if (buyConfig.amountQuote) {
       if (buyConfig.amountQuote >= Number(balance.available)) {
-        console.log(
+        this.logger.log(
           'executeBuyJob: Not enough balance for Order',
-          balance,
-          buyConfig.amountQuote,
+          JSON.stringify({
+            balance,
+            amountQuote: buyConfig.amountQuote,
+          }),
         );
 
         return false;
@@ -183,11 +198,11 @@ export class AppService implements OnModuleInit {
 
         return true;
       } catch (e) {
-        console.error('executeBuyJob: failed to execute order', e);
+        this.logger.error('executeBuyJob: failed to execute order', e);
       }
     } else if (buyConfig.amount) {
       // TODO
-      console.log('not implemented');
+      this.logger.log('not implemented');
     }
 
     return false;
@@ -204,7 +219,7 @@ export class AppService implements OnModuleInit {
 
       return true;
     } catch (e) {
-      console.error('executeWithdrawJob: failed to create withdrawal', e);
+      this.logger.error('executeWithdrawJob: failed to create withdrawal', e);
     }
 
     return false;

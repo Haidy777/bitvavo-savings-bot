@@ -104,7 +104,4 @@ export class BitvavoService {
   createMarketBuyOrderWithAmountQuote(market: string, amountQuote: number) {
     return this.bitvavo.placeOrder(market, 'buy', 'market', { amountQuote });
   }
-
-  //let response = await bitvavo.placeOrder('BTC-EUR', 'sell', 'limit', { 'amount': '1', 'price': 3000 })
-  //   console.log(response)
 }

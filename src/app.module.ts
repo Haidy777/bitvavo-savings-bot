@@ -4,6 +4,8 @@ import { BitvavoService } from './bitvavo/bitvavo.service';
 import { ConfigModule } from '@nestjs/config';
 import configuration from './configuration';
 import { ScheduleModule } from '@nestjs/schedule';
+import { HttpModule } from '@nestjs/axios';
+import { Logger } from './logger/logger.service';
 
 @Module({
   imports: [
@@ -13,7 +15,8 @@ import { ScheduleModule } from '@nestjs/schedule';
       envFilePath: ['.env.development.local'],
     }),
     ScheduleModule.forRoot(),
+    HttpModule,
   ],
-  providers: [AppService, BitvavoService],
+  providers: [AppService, BitvavoService, Logger],
 })
 export class AppModule {}

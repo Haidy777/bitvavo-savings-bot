@@ -9,6 +9,7 @@
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "redeploy": "npm ci && npm run build && pm2 stop ecosystem.config.js && pm2 start ecosystem.config.js",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
@@ -21,6 +22,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs/axios": "^1.0.0",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.2.0",
     "@nestjs/core": "^9.0.0",
@@ -56,7 +58,7 @@
     "typescript": "^4.7.4"
   },
   "jest": {
-    "moduleFileExtensions": [
+    "modulecFileExtensions": [
       "js",
       "json",
       "ts"
