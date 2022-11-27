@@ -12,7 +12,7 @@ import { Logger } from './logger/logger.service';
     ConfigModule.forRoot({
       isGlobal: true,
       load: [configuration],
-      envFilePath: ['.env.development.local'],
+      envFilePath: ['.env.development.local', '.env'],
     }),
     ScheduleModule.forRoot(),
     HttpModule,

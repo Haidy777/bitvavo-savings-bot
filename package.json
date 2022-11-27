@@ -9,7 +9,7 @@
     "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "redeploy": "npm ci && npm run build && pm2 stop ecosystem.config.js && pm2 start ecosystem.config.js",
+    "redeploy": "git pull && npm ci && npm run build && pm2 stop ecosystem.config.js && pm2 start ecosystem.config.js",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
