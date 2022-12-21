@@ -6,6 +6,6 @@ export interface IBuyConfigEntry {
 }
 
 export const BUY_CONFIG: IBuyConfigEntry[] = [
-  { market: 'ETH-EUR', amountQuote: 15, cron: '1 1 * * MON' },
-  { market: 'DOT-EUR', amountQuote: 15, cron: '1 1 * * MON' },
+  { market: 'ETH-EUR', amountQuote: 10, cron: '1 1 * * MON' },
+  { market: 'DOT-EUR', amountQuote: 10, cron: '1 1 * * MON' },
 ];
